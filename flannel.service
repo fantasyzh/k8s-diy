@@ -1,0 +1,11 @@
+[Unit]
+Description=flanneld server
+Requires=etcd2.service
+After=etcd2.service
+
+[Service]
+ExecStart=/opt/flannel/flanneld --iface=eth1 --etcd-endpoints=http://{{ master_ip }}:2379
+Restart=always
+
+[Install]
+WantedBy=multi-user.target

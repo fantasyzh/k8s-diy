@@ -1,0 +1,9 @@
+[Unit]
+Description=etcd2 server
+
+[Service]
+ExecStart=/opt/etcd/etcd --listen-client-urls=http://0.0.0.0:2379 --advertise-client-urls=http://{{ master_ip }}:2379
+Restart=always
+
+[Install]
+WantedBy=multi-user.target
