@@ -77,11 +77,15 @@ Vagrant.configure("2") do |config|
 
     provisionMachineSSL(master,"apiserver","kube-apiserver-#{$master_ip}",[$master_ip])
 
-    # provision
     # deploy etcd
     master.vm.provision :shell, :path => "provision_etcd.sh", :args => $master_ip, :privileged => true
     # deploy flannel
     master.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
+
+    # docker with flannel
+
+    # kubelet
+    master.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "master", $master_ip ], :privileged => true
 
     #env_file = Tempfile.new('env_file')
     #env_file.write("ETCD_ENDPOINTS=#{etcd_endpoints}\n")
@@ -109,6 +113,12 @@ Vagrant.configure("2") do |config|
       worker.vm.synced_folder ".", "/vagrant", type: "nfs"
 
       provisionMachineSSL(worker,"worker","kube-worker-#{worker_ip}",[worker_ip])
+
+      # deploy flannel
+      worker.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
+
+      # kubelet
+      worker.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "worker", $master_ip ], :privileged => true
 
       #env_file = Tempfile.new('env_file')
       #env_file.write("ETCD_ENDPOINTS=#{etcd_endpoints}\n")

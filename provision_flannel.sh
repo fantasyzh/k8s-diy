@@ -6,7 +6,7 @@ pod_network=$2
 
 # prepare etcd config
 sed "s#{{ pod_network }}#$pod_network#g" /vagrant/flannel_config.json > /tmp/flannel_config.json
-/opt/etcd/etcdctl --endpoint http://$master_ip:2379 set /coreos.com/network/config "`cat /tmp/flannel_config.json`"
+/opt/etcd/etcdctl --endpoints http://$master_ip:2379 set /coreos.com/network/config "`cat /tmp/flannel_config.json`"
 
 flannel_release=flannel-0.5.5
 install -d /opt/flannel
