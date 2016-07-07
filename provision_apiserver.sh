@@ -1,3 +1,6 @@
+set -e
+set -x
+
 master_ip=$1
 service_ip_range=$2
 

@@ -1,3 +1,5 @@
+set -e
+set -x
 
 image_tag=`cat /vagrant/kubernetes/server/bin/kube-scheduler.docker_tag`
 docker load -i /vagrant/kubernetes/server/bin/kube-scheduler.tar
