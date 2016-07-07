@@ -77,25 +77,23 @@ Vagrant.configure("2") do |config|
 
     provisionMachineSSL(master,"apiserver","kube-apiserver-#{$master_ip}",[$master_ip])
 
+    #timedatectl set-timezone Asia/Shanghai
+    master.vm.provision :shell, inline: "timedatectl set-timezone Asia/Shanghai", :privileged => true
+    
     # deploy etcd
     master.vm.provision :shell, :path => "provision_etcd.sh", :args => $master_ip, :privileged => true
     # deploy flannel
     master.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
 
     # docker with flannel
+    master.vm.provision :shell, :path => "provision_docker.sh", :privileged => true
 
     # kubelet
-    master.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "master", $master_ip ], :privileged => true
+    master.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "master", $master_ip, $master_ip ], :privileged => true
 
-    #env_file = Tempfile.new('env_file')
-    #env_file.write("ETCD_ENDPOINTS=#{etcd_endpoints}\n")
-    #env_file.close
+    # kube-apiserver
+    master.vm.provision :shell, :path => "provision_apiserver.sh", :args => [ $master_ip, $service_network ], :privileged => true
 
-    #master.vm.provision :file, :source => env_file, :destination => "/tmp/coreos-kube-options.env"
-    #master.vm.provision :shell, :inline => "mkdir -p /run/coreos-kubernetes && mv /tmp/coreos-kube-options.env /run/coreos-kubernetes/options.env", :privileged => true
-
-    #master.vm.provision :file, :source => CONTROLLER_CLOUD_CONFIG_PATH, :destination => "/tmp/vagrantfile-user-data"
-    #master.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
   end
 
   (1..$worker_count).each do |i|
@@ -112,24 +110,17 @@ Vagrant.configure("2") do |config|
 
       worker.vm.synced_folder ".", "/vagrant", type: "nfs"
 
+      #timedatectl set-timezone Asia/Shanghai
+      worker.vm.provision :shell, inline: "timedatectl set-timezone Asia/Shanghai", :privileged => true
+
       provisionMachineSSL(worker,"worker","kube-worker-#{worker_ip}",[worker_ip])
 
       # deploy flannel
       worker.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
 
       # kubelet
-      worker.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "worker", $master_ip ], :privileged => true
+      worker.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "worker", worker_ip, $master_ip ], :privileged => true
 
-      #env_file = Tempfile.new('env_file')
-      #env_file.write("ETCD_ENDPOINTS=#{etcd_endpoints}\n")
-      #env_file.write("CONTROLLER_ENDPOINT=https://#{controllerIPs[0]}\n") #TODO(aaron): LB or DNS across control nodes
-      #env_file.close
-
-      #worker.vm.provision :file, :source => env_file, :destination => "/tmp/coreos-kube-options.env"
-      #worker.vm.provision :shell, :inline => "mkdir -p /run/coreos-kubernetes && mv /tmp/coreos-kube-options.env /run/coreos-kubernetes/options.env", :privileged => true
-
-      #worker.vm.provision :file, :source => WORKER_CLOUD_CONFIG_PATH, :destination => "/tmp/vagrantfile-user-data"
-      #worker.vm.provision :shell, :inline => "mv /tmp/vagrantfile-user-data /var/lib/coreos-vagrant/", :privileged => true
     end
   end
 end

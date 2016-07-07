@@ -6,6 +6,7 @@ After=etcd2.service
 [Service]
 ExecStart=/opt/flannel/flanneld --iface=eth1 --etcd-endpoints=http://{{ master_ip }}:2379
 Restart=always
+ExecStartPost=/opt/flannel/mk-docker-opts.sh -d /run/flannel_docker_opts.env -i
 
 [Install]
 WantedBy=multi-user.target
