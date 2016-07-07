@@ -11,7 +11,7 @@ $master_ip = "10.245.1.2"
 $worker_count = 1
 $worker_vm_memory = 1024
 
-$pod_network = "10.246.1.0/24"
+$pod_network = "10.246.0.0/16"
 $service_network = "10.247.1.0/24"
 
 ### end config ###
@@ -94,6 +94,14 @@ Vagrant.configure("2") do |config|
     # kube-apiserver
     master.vm.provision :shell, :path => "provision_apiserver.sh", :args => [ $master_ip, $service_network ], :privileged => true
 
+    # kube-proxy
+    master.vm.provision :shell, :path => "provision_kube_proxy.sh", :args => [ "master", $master_ip ], :privileged => true
+
+    # kube-controller-manager
+    master.vm.provision :shell, :path => "provision_controller.sh", :privileged => true
+
+    # kube-scheduler
+    master.vm.provision :shell, :path => "provision_scheduler.sh", :privileged => true
   end
 
   (1..$worker_count).each do |i|
@@ -120,6 +128,9 @@ Vagrant.configure("2") do |config|
 
       # kubelet
       worker.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "worker", worker_ip, $master_ip ], :privileged => true
+
+      # kube-proxy
+      worker.vm.provision :shell, :path => "provision_kube_proxy.sh", :args => [ "worker", $master_ip ], :privileged => true
 
     end
   end
