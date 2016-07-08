@@ -8,8 +8,8 @@ $coreos_box_version = "0"
 $master_vm_memory = 512
 $master_ip = "10.245.1.2"
 
-$worker_count = 1
-$worker_vm_memory = 1024
+$worker_count = 2
+$worker_vm_memory = 512
 
 $pod_network = "10.246.0.0/16"
 $service_network = "10.247.1.0/24"
@@ -81,10 +81,10 @@ Vagrant.configure("2") do |config|
     master.vm.provision :shell, inline: "timedatectl set-timezone Asia/Shanghai", :privileged => true
     
     # deploy etcd
-    master.vm.provision :shell, :path => "provision_etcd.sh", :args => $master_ip, :privileged => true
+    master.vm.provision :shell, :path => "provision_etcd.sh", :args => [ $master_ip, $pod_network ], :privileged => true
 
     # deploy flannel
-    master.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
+    master.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip ], :privileged => true
 
     # docker with flannel
     master.vm.provision :shell, :path => "provision_docker.sh", :privileged => true
@@ -125,7 +125,7 @@ Vagrant.configure("2") do |config|
       provisionMachineSSL(worker,"worker","kube-worker-#{worker_ip}",[worker_ip])
 
       # deploy flannel
-      worker.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
+      worker.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip ], :privileged => true
 
       # docker with flannel
       worker.vm.provision :shell, :path => "provision_docker.sh", :privileged => true

@@ -1,6 +1,0 @@
-{
-    "Network": "{{ pod_network }}",
-    "Backend": {
-        "Type": "udp"
-    }
-}
