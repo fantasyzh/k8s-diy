@@ -4,6 +4,7 @@ Requires=etcd2.service
 After=etcd2.service
 
 [Service]
+ExecStartPre=sh -c '/opt/etcd/etcdctl --endpoints http://{{ master_ip }}:2379 set /coreos.com/network/config "$(cat /tmp/flannel_config.json)"'
 ExecStart=/opt/flannel/flanneld --iface=eth1 --etcd-endpoints=http://{{ master_ip }}:2379
 Restart=always
 ExecStartPost=/opt/flannel/mk-docker-opts.sh -i
