@@ -82,6 +82,7 @@ Vagrant.configure("2") do |config|
     
     # deploy etcd
     master.vm.provision :shell, :path => "provision_etcd.sh", :args => $master_ip, :privileged => true
+
     # deploy flannel
     master.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
 
@@ -125,6 +126,9 @@ Vagrant.configure("2") do |config|
 
       # deploy flannel
       worker.vm.provision :shell, :path => "provision_flannel.sh", :args => [ $master_ip, $pod_network ], :privileged => true
+
+      # docker with flannel
+      worker.vm.provision :shell, :path => "provision_docker.sh", :privileged => true
 
       # kubelet
       worker.vm.provision :shell, :path => "provision_kubelet.sh", :args => [ "worker", worker_ip, $master_ip ], :privileged => true
