@@ -20,3 +20,5 @@ sed -e "s/{{ advertise_ip }}/$advertise_ip/g" -e "s#{{ specific_flags }}#$specif
 cp /tmp/kubelet.service /etc/systemd/system/kubelet.service
 systemctl enable kubelet.service
 systemctl restart kubelet.service
+
+docker load -i "/vagrant/kubernetes/addons/gcr.io~google_containers~pause:2.0.tar"
