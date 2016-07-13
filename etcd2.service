@@ -4,7 +4,6 @@ After=network-online.target
 
 [Service]
 ExecStart=/opt/etcd/etcd --listen-client-urls=http://0.0.0.0:2379 --advertise-client-urls=http://{{ master_ip }}:2379
-ExecStartPost=/bin/sh -c '/opt/etcd/etcdctl --endpoints http://{{ master_ip }}:2379 set /coreos.com/network/config "{\"Network\": \"{{ pod_network }}\", \"Backend\": { \"Type\": \"udp\" } }"'
 Restart=always
 
 [Install]
